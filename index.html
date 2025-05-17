@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>COT Report Data Dashboard</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: #000000;
+            color: #FFFFFF;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 32px 16px;
+        }
+
+        h1 {
+            font-size: 1.875rem;
+            font-weight: 700;
+            margin-bottom: 32px;
+            text-align: center;
+        }
+
+        .dashboard-section {
+            background-color: #222222;
+            padding: 12px;
+            border-radius: 8px;
+            border: 1px solid #1f2937;
+            margin-bottom: 32px;
+        }
+
+        .dashboard-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .category-select {
+            background-color: #2563eb;
+            color: white;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 1.125rem;
+            font-weight: 600;
+            border: none;
+            cursor: pointer;
+        }
+
+        .dashboard-container {
+            background-color: #000000;
+            color: #FFFFFF;
+            padding: 12px;
+            border-radius: 8px;
+            width: 100%;
+            overflow-x: auto;
+            border: 1px solid #1f2937;
+        }
+
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 16px;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .controls-left {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .control-group {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .control-label {
+            font-size: 0.875rem;
+            color: #888888;
+            font-weight: 500;
+        }
+
+        .select-input {
+            padding: 4px 12px;
+            border: 1px solid #1f2937;
+            border-radius: 4px;
+            background-color: #000000;
+            color: #FFFFFF;
+            font-size: 0.875rem;
+            cursor: pointer;
+        }
+
+        .select-input:hover {
+            border-color: #374151;
+        }
+
+        .button {
+            background-color: #4b5563;
+            color: white;
+            padding: 4px 16px;
+            border-radius: 4px;
+            font-size: 0.875rem;
+            border: none;
+            cursor: pointer;
+            transition: opacity 0.2s;
+        }
+
+        .button:hover {
+            opacity: 0.8;
+        }
+
+        .button.primary {
+            background-color: #2563eb;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 320px;
+            margin-bottom: 16px;
+            position: relative;
+        }
+        
+        /* Add transition for smooth appearance */
+        #chartSection1, #chartSection2 {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        #chartSection1[style*="display: none"],
+        #chartSection2[style*="display: none"] {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        
+        #chartSection1[style*="display: block"],
+        #chartSection2[style*="display: block"] {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .chart-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-header {
+            text-align: left;
+            padding: 8px;
+            font-weight: 600;
+            color: #9ca3af;
+            border-bottom: 1px solid #374151;
+            font-size: 0.75rem;
+            background-color: #111111;
+        }
+
+        .table-header.text-right {
+            text-align: right;
+        }
+
+        .table-header.text-center {
+            text-align: center;
+        }
+
+        .table-cell {
+            padding: 8px;
+            border-bottom: 1px solid #1f2937;
+            font-size: 0.875rem;
+        }
+
+        .table-cell.text-right {
+            text-align: right;
+        }
+
+        .table-cell.text-center {
+            text-align: center;
+        }
+
+        .table-container {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .text-accent {
+            color: #EAB308;
+        }
+
+        .signal-button {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+
+        .signal-buy {
+            background-color: #00FF00;
+            color: #000000;
+        }
+
+        .signal-sell {
+            background-color: #FF0000;
+            color: #FFFFFF;
+        }
+
+        canvas {
+            width: 100% !important;
+            height: 100% !important;
+        }
+
+        @media (max-width: 768px) {
+            .controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .controls-left {
+                flex-direction: column;
+                gap: 8px;
+            }
+            
+            .control-group {
+                flex-direction: column;
+                align-items: stretch;
+                gap: 4px;
+            }
+            
+            .table-header.hidden-mobile,
+            .table-cell.hidden-mobile {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>COT Report Data Dashboard</h1>
+        
+        <!-- First Dashboard -->
+        <div class="dashboard-section">
+            <h2 class="dashboard-header">
+                <select id="category1" class="category-select">
+                    <option value="leveraged_funds">Leveraged Funds</option>
+                    <option value="asset_manager">Asset Manager</option>
+                    <option value="dealer">Dealer</option>
+                </select>
+                <span>Dashboard</span>
+            </h2>
+            
+            <div class="dashboard-container">
+                <div class="controls">
+                    <div class="controls-left">
+                        <div class="control-group">
+                            <label class="control-label" for="currency1">Currency:</label>
+                            <select id="currency1" class="select-input">
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="JPY">JPY</option>
+                                <option value="USD">USD</option>
+                                <option value="AUD">AUD</option>
+                                <option value="CAD">CAD</option>
+                                <option value="CHF">CHF</option>
+                                <option value="NZD">NZD</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label" for="year1">Year:</label>
+                            <select id="year1" class="select-input">
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button id="toggleChart1" class="button">Show Chart</button>
+                </div>
+                
+                <div id="chartSection1" style="display: none;">
+                    <h3 class="chart-title">Net Position Chart</h3>
+                    <div class="chart-container">
+                        <canvas id="netChart1"></canvas>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="chart-title">Positions Table</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="table-header">Date</th>
+                                    <th class="table-header text-right hidden-mobile">Long</th>
+                                    <th class="table-header text-right hidden-mobile">Short</th>
+                                    <th class="table-header text-right">Long %</th>
+                                    <th class="table-header text-right">Short %</th>
+                                    <th class="table-header text-right">Net %</th>
+                                    <th class="table-header text-center">Signal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTable1">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Second Dashboard -->
+        <div class="dashboard-section">
+            <h2 class="dashboard-header">
+                <select id="category2" class="category-select">
+                    <option value="leveraged_funds">Leveraged Funds</option>
+                    <option value="asset_manager">Asset Manager</option>
+                    <option value="dealer">Dealer</option>
+                </select>
+                <span>Dashboard</span>
+            </h2>
+            
+            <div class="dashboard-container">
+                <div class="controls">
+                    <div class="controls-left">
+                        <div class="control-group">
+                            <label class="control-label" for="currency2">Currency:</label>
+                            <select id="currency2" class="select-input">
+                                <option value="EUR">EUR</option>
+                                <option value="GBP">GBP</option>
+                                <option value="JPY">JPY</option>
+                                <option value="USD">USD</option>
+                                <option value="AUD">AUD</option>
+                                <option value="CAD">CAD</option>
+                                <option value="CHF">CHF</option>
+                                <option value="NZD">NZD</option>
+                            </select>
+                        </div>
+                        
+                        <div class="control-group">
+                            <label class="control-label" for="year2">Year:</label>
+                            <select id="year2" class="select-input">
+                                <option value="2025">2025</option>
+                                <option value="2024">2024</option>
+                                <option value="2023">2023</option>
+                            </select>
+                        </div>
+                    </div>
+                    
+                    <button id="toggleChart2" class="button">Show Chart</button>
+                </div>
+                
+                <div id="chartSection2" style="display: none;">
+                    <h3 class="chart-title">Net Position Chart</h3>
+                    <div class="chart-container">
+                        <canvas id="netChart2"></canvas>
+                    </div>
+                </div>
+                
+                <div>
+                    <h3 class="chart-title">Positions Table</h3>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th class="table-header">Date</th>
+                                    <th class="table-header text-right hidden-mobile">Long</th>
+                                    <th class="table-header text-right hidden-mobile">Short</th>
+                                    <th class="table-header text-right">Long %</th>
+                                    <th class="table-header text-right">Short %</th>
+                                    <th class="table-header text-right">Net %</th>
+                                    <th class="table-header text-center">Signal</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dataTable2">
+                                <!-- Data will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    <script src="data.js"></script>
+    <script src="renderer.js"></script>
+</body>
+</html>
